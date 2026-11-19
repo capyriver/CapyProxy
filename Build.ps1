@@ -13,17 +13,19 @@ $outDir = Join-Path $root 'dist'
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 $output = Join-Path $outDir 'CapyProxy.exe'
 
+$frameworkDir = Split-Path -Parent $compiler
+$wpfDir = Join-Path $frameworkDir 'WPF'
 $references = @(
-    '/reference:System.dll',
-    '/reference:System.Core.dll',
-    '/reference:System.Security.dll',
-    '/reference:System.Management.dll',
-    '/reference:System.Drawing.dll',
-    '/reference:System.Windows.Forms.dll',
-    '/reference:System.Xaml.dll',
-    '/reference:WindowsBase.dll',
-    '/reference:PresentationCore.dll',
-    '/reference:PresentationFramework.dll'
+    "/reference:$(Join-Path $frameworkDir 'System.dll')",
+    "/reference:$(Join-Path $frameworkDir 'System.Core.dll')",
+    "/reference:$(Join-Path $frameworkDir 'System.Security.dll')",
+    "/reference:$(Join-Path $frameworkDir 'System.Management.dll')",
+    "/reference:$(Join-Path $frameworkDir 'System.Drawing.dll')",
+    "/reference:$(Join-Path $frameworkDir 'System.Windows.Forms.dll')",
+    "/reference:$(Join-Path $frameworkDir 'System.Xaml.dll')",
+    "/reference:$(Join-Path $wpfDir 'WindowsBase.dll')",
+    "/reference:$(Join-Path $wpfDir 'PresentationCore.dll')",
+    "/reference:$(Join-Path $wpfDir 'PresentationFramework.dll')"
 )
 
 $arguments = @(

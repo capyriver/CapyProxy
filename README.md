@@ -10,6 +10,7 @@
 - Expose the local endpoint at `http://127.0.0.1:8080` for compatible applications.
 - Save the profile encrypted with Windows DPAPI for the current user account.
 - Start or stop the bridge from the main panel; minimize the window to the notification area.
+- Enforce a single running CapyProxy instance; reopening it restores the existing window instead of adding another tray icon.
 - Optionally start the connection when the current user signs in to Windows.
 - Check the public IP returned by `api.ipify.org` through the local endpoint.
 - Keep a small in-app session event log.
@@ -85,6 +86,7 @@ CapyProxy source in this repository is provided under the MIT License; see [LICE
 - 为兼容的应用提供本地入口 `http://127.0.0.1:8080`。
 - 使用当前 Windows 用户的 DPAPI 加密保存配置。
 - 在主窗口中连接或断开；最小化后驻留系统托盘。
+- 同一时间只运行一个 CapyProxy 实例；再次打开时会唤回已有窗口，不会重复添加托盘图标。
 - 可选在当前 Windows 用户登录时自动启动代理。
 - 通过本地入口请求 `api.ipify.org` 检查公网 IP。
 - 在应用内查看本次运行的事件记录。
@@ -158,6 +160,7 @@ assets/         幽灵图案和 Windows 图标
 - Локальный адрес `http://127.0.0.1:8080` для совместимых приложений.
 - Шифрование профиля средствами Windows DPAPI для текущей учётной записи.
 - Подключение и отключение из главного окна; сворачивание в системный трей.
+- Одновременно работает только один экземпляр CapyProxy; повторный запуск возвращает существующее окно вместо создания ещё одного значка в трее.
 - Необязательный автозапуск прокси при входе текущего пользователя Windows.
 - Проверка внешнего IP запросом к `api.ipify.org` через локальную точку.
 - Журнал событий текущего сеанса внутри приложения.
@@ -231,6 +234,7 @@ GOST в репозиторий не включён. Получайте его и
 - Үйлесімді қолданбалар үшін `http://127.0.0.1:8080` жергілікті мекенжайын ұсыну.
 - Профильді Windows DPAPI арқылы ағымдағы пайдаланушы тіркелгісіне арнап шифрлап сақтау.
 - Негізгі терезеден қосу және ажырату; терезені жүйелік трейге жинау.
+- Бір уақытта CapyProxy бағдарламасының тек бір данасы жұмыс істейді; қайта ашқанда жаңа трей белгішесін қоспай, бұрынғы терезені көрсетеді.
 - Ағымдағы Windows пайдаланушысы кіргенде автоматты қосылуды таңдау.
 - Жергілікті нүкте арқылы `api.ipify.org` сұрауымен сыртқы IP мекенжайын тексеру.
 - Қолданба ішінде ағымдағы сеанс оқиғаларының журналын жүргізу.
@@ -289,4 +293,3 @@ assets/         Елестің суреті мен Windows белгішесі
 GOST репозиторийге кірмейді. Оны [go-gost/gost ресми жобасынан](https://github.com/go-gost/gost) алып, қолданар алдында ағымдағы лицензиясы мен шығарылым жазбаларын тексеріңіз. CapyProxy — GOST әзірлеушілеріне қатысы жоқ тәуелсіз жоба.
 
 Осы репозиторийдегі CapyProxy бастапқы коды MIT лицензиясымен таратылады; толық мәтіні [LICENSE](LICENSE) файлында. Үшінші тарап бағдарламалары мен графикасына бөлек шарттар қолданылуы мүмкін.
-

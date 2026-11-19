@@ -21,9 +21,10 @@ using Forms=System.Windows.Forms;
 class Studio {
  static readonly string binary=@"C:\gost\gost.exe", local="http://127.0.0.1:8080";
  static readonly string profile=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"CapyProxy","profile");
+ const string instanceMutex=@"Local\CapyProxy.SingleInstance", showEvent=@"Local\CapyProxy.Show";
  const string runKey=@"Software\Microsoft\Windows\CurrentVersion\Run";
  static string self { get{return Assembly.GetExecutingAssembly().Location;} }
- Window w; Forms.NotifyIcon tray; string proto, savedHost,savedPort,savedProto; bool busy,checking,active,init=true; int generation;
+ Window w; Forms.NotifyIcon tray; EventWaitHandle showSignal; readonly DispatcherTimer showTimer=new DispatcherTimer(); string proto, savedHost,savedPort,savedProto; bool busy,checking,active,init=true; int generation;
  readonly DispatcherTimer timer=new DispatcherTimer();
  T C<T>(string n) where T:FrameworkElement {return (T)w.FindName(n);}
  void Click(string n,Action action){C<Button>(n).Click+=(s,e)=>{try{action();}catch(Exception ex){Msg(ex.Message);}};}
@@ -47,14 +48,14 @@ class Studio {
  static BitmapImage Asset(string n){var b=new BitmapImage();b.BeginInit();b.CacheOption=BitmapCacheOption.OnLoad;using(var s=Assembly.GetExecutingAssembly().GetManifestResourceStream(n)){b.StreamSource=s;b.EndInit();}b.Freeze();return b;}
  void Preview(string path){w.UpdateLayout();var root=(FrameworkElement)w.Content;var dpi=VisualTreeHelper.GetDpi(root);var bmp=new RenderTargetBitmap((int)Math.Ceiling(root.ActualWidth*dpi.DpiScaleX),(int)Math.Ceiling(root.ActualHeight*dpi.DpiScaleY),dpi.PixelsPerInchX,dpi.PixelsPerInchY,PixelFormats.Pbgra32);bmp.Render(root);var enc=new PngBitmapEncoder();enc.Frames.Add(BitmapFrame.Create(bmp));using(var f=File.Create(path))enc.Save(f);}
  async void Poll(){if(busy)return;int g=generation;try{bool on=await Task.Run(()=>Owned().Length>0);if(g==generation&&!busy)Render(on);}catch{Text("Notice","Не удалось прочитать состояние GOST.");}}
- public Studio(string[] args){ServicePointManager.SecurityProtocol=SecurityProtocolType.Tls12;var app=new Application();using(var s=Assembly.GetExecutingAssembly().GetManifestResourceStream("ui"))w=(Window)XamlReader.Load(s);
+ public Studio(string[] args,EventWaitHandle signal){showSignal=signal;ServicePointManager.SecurityProtocol=SecurityProtocolType.Tls12;var app=new Application();using(var s=Assembly.GetExecutingAssembly().GetManifestResourceStream("ui"))w=(Window)XamlReader.Load(s);
  w.MaxHeight=SystemParameters.WorkArea.Height;w.MaxWidth=SystemParameters.WorkArea.Width;
  w.Icon=Asset("ghost");C<Image>("Ghost").Source=w.Icon;tray=new Forms.NotifyIcon{Icon=System.Drawing.Icon.ExtractAssociatedIcon(self),Visible=true,Text="CapyProxy"};tray.DoubleClick+=(s,e)=>Restore();var menu=new Forms.ContextMenuStrip();menu.Items.Add("Открыть CapyProxy",null,(s,e)=>Restore());menu.Items.Add("Проверить IP",null,(s,e)=>{Restore();Page("Home");Verify();});menu.Items.Add("Закрыть панель",null,(s,e)=>w.Close());tray.ContextMenuStrip=menu;
  foreach(var p in new[]{"Home","Profile","Log"}){string page=p;Click("Nav"+page,()=>Page(page));}Click("TrayBtn",()=>w.Hide());Click("CheckIp",Verify);Click("Copy",()=>{Clipboard.SetText(local);Msg("Адрес скопирован.");});Click("Clear",()=>{C<TextBox>("Events").Clear();Text("Notice","Журнал очищен.");});Click("Save",()=>{Persist();Msg(active?"Профиль сохранён. Переподключитесь, чтобы применить изменения.":"Профиль сохранён.");});Click("Http",()=>Protocol("http"));Click("Socks",()=>Protocol("socks5"));Click("Toggle",async ()=>await Change(!active));
  var reveal=C<CheckBox>("Reveal");var secret=C<PasswordBox>("Secret");var plain=C<TextBox>("Plain");reveal.Checked+=(s,e)=>{plain.Text=secret.Password;plain.Visibility=Visibility.Visible;secret.Visibility=Visibility.Collapsed;};reveal.Unchecked+=(s,e)=>{secret.Password=plain.Text;plain.Clear();secret.Visibility=Visibility.Visible;plain.Visibility=Visibility.Collapsed;};
  var auto=C<CheckBox>("Auto");using(var k=Registry.CurrentUser.OpenSubKey(runKey))auto.IsChecked=k!=null&&k.GetValue("CapyProxy")!=null;auto.Checked+=(s,e)=>SetAuto(true);auto.Unchecked+=(s,e)=>SetAuto(false);init=false;
- Load();Page("Home");Render(Owned().Length>0);timer.Interval=TimeSpan.FromSeconds(5);timer.Tick+=(s,e)=>Poll();timer.Start();
- w.ContentRendered+=async (s,e)=>{if(args.Contains("/auto")){await Change(true);if(active)w.Hide();}var preview=Environment.GetEnvironmentVariable("CAPY_PREVIEW");if(!string.IsNullOrEmpty(preview))Preview(preview);};w.StateChanged+=(s,e)=>{if(w.WindowState==WindowState.Minimized)w.Hide();};w.Closed+=(s,e)=>{timer.Stop();tray.Dispose();app.Shutdown();};app.Run(w);}
- [STAThread]public static void Main(string[] args){try{new Studio(args);}catch(Exception ex){MessageBox.Show(ex.GetBaseException().Message,"CapyProxy");}}
+ Load();Page("Home");Render(Owned().Length>0);timer.Interval=TimeSpan.FromSeconds(5);timer.Tick+=(s,e)=>Poll();timer.Start();showTimer.Interval=TimeSpan.FromMilliseconds(350);showTimer.Tick+=(s,e)=>{try{if(showSignal.WaitOne(0))Restore();}catch(ObjectDisposedException){showTimer.Stop();}};showTimer.Start();
+ w.ContentRendered+=async (s,e)=>{if(args.Contains("/auto")){await Change(true);if(active)w.Hide();}var preview=Environment.GetEnvironmentVariable("CAPY_PREVIEW");if(!string.IsNullOrEmpty(preview))Preview(preview);};w.StateChanged+=(s,e)=>{if(w.WindowState==WindowState.Minimized)w.Hide();};w.Closed+=(s,e)=>{showTimer.Stop();timer.Stop();tray.Dispose();app.Shutdown();};app.Run(w);}
+ [STAThread]public static void Main(string[] args){try{using(var signal=new EventWaitHandle(false,EventResetMode.AutoReset,showEvent)){bool created;using(var mutex=new Mutex(true,instanceMutex,out created)){if(!created){signal.Set();return;}try{new Studio(args,signal);}finally{mutex.ReleaseMutex();}}}}catch(Exception ex){MessageBox.Show(ex.GetBaseException().Message,"CapyProxy");}}
 }
 
