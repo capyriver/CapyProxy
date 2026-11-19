@@ -1,0 +1,26 @@
+# Build outputs
+dist/
+bin/
+obj/
+*.exe
+*.pdb
+*.cache
+
+# Local profiles, proxy exports, logs and credentials
+profile
+profile.*
+*.proxy
+*.proxy.txt
+proxies.txt
+*.log
+.env
+.env.*
+secrets.*
+
+# IDE and OS files
+.vs/
+.vscode/
+*.user
+*.suo
+Thumbs.db
+Desktop.ini
