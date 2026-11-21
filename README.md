@@ -8,6 +8,7 @@
 
 - Configure an upstream HTTP or SOCKS5 endpoint, including optional username and password.
 - Expose the local endpoint at `http://127.0.0.1:8080` for compatible applications.
+- On connection, route Windows applications that use the system proxy through the local endpoint; restore the previous Windows proxy settings on disconnect or exit.
 - Save the profile encrypted with Windows DPAPI for the current user account.
 - Start or stop the bridge from the main panel; minimize the window to the notification area.
 - Enforce a single running CapyProxy instance; reopening it restores the existing window instead of adding another tray icon.
@@ -43,7 +44,7 @@ The output is written to `dist\CapyProxy.exe`. The executable is intentionally i
 4. Select **Подключить**. Compatible applications can use `http://127.0.0.1:8080` as their HTTP proxy.
 5. Select **Проверить IP** to check the public address reported through the bridge.
 
-The app does not switch a VPN on or off and does not change the Windows-wide proxy setting. The auto-start option registers CapyProxy for the current Windows user only.
+The app does not switch a VPN on or off. While connected, it temporarily sets the current user's Windows proxy to `127.0.0.1:8080` and restores the previous values on disconnect or exit. Auto-start is registered for the current Windows user only.
 
 ## Security and privacy
 
@@ -84,6 +85,7 @@ CapyProxy source in this repository is provided under the MIT License; see [LICE
 
 - 配置上游 HTTP 或 SOCKS5 代理，可选填写用户名和密码。
 - 为兼容的应用提供本地入口 `http://127.0.0.1:8080`。
+- 连接时将使用 Windows 系统代理的应用转发到本地入口；断开或退出时恢复原有的 Windows 代理设置。
 - 使用当前 Windows 用户的 DPAPI 加密保存配置。
 - 在主窗口中连接或断开；最小化后驻留系统托盘。
 - 同一时间只运行一个 CapyProxy 实例；再次打开时会唤回已有窗口，不会重复添加托盘图标。
@@ -119,7 +121,7 @@ Set-ExecutionPolicy -Scope Process Bypass
 4. 点击 **Подключить**。兼容应用可将 `http://127.0.0.1:8080` 设为 HTTP 代理。
 5. 点击 **Проверить IP**，查看通过代理入口返回的公网地址。
 
-本程序不会开关 VPN，也不会更改 Windows 全局代理设置。自动启动选项只为当前 Windows 用户注册启动项。
+本程序不会开关 VPN。连接期间，它会暂时将当前 Windows 用户的系统代理设为 `127.0.0.1:8080`，并在断开或退出时恢复原设置。自动启动只为当前 Windows 用户注册。
 
 ### 安全与隐私
 
@@ -158,6 +160,7 @@ assets/         幽灵图案和 Windows 图标
 
 - Настройка вышестоящего HTTP- или SOCKS5-прокси с необязательными логином и паролем.
 - Локальный адрес `http://127.0.0.1:8080` для совместимых приложений.
+- При подключении приложения Windows, использующие системный прокси, направляются через локальную точку; при отключении или выходе прежние настройки Windows восстанавливаются.
 - Шифрование профиля средствами Windows DPAPI для текущей учётной записи.
 - Подключение и отключение из главного окна; сворачивание в системный трей.
 - Одновременно работает только один экземпляр CapyProxy; повторный запуск возвращает существующее окно вместо создания ещё одного значка в трее.
@@ -193,7 +196,7 @@ Set-ExecutionPolicy -Scope Process Bypass
 4. Нажмите **Подключить**. Совместимые приложения могут использовать `http://127.0.0.1:8080` как HTTP-прокси.
 5. Нажмите **Проверить IP**, чтобы проверить внешний адрес через локальную точку.
 
-Приложение не включает и не выключает VPN и не меняет системную настройку прокси Windows. Автозапуск регистрируется только для текущего пользователя Windows.
+Приложение не включает и не выключает VPN. Во время подключения оно временно задаёт системный прокси текущего пользователя Windows как `127.0.0.1:8080` и восстанавливает прежние настройки при отключении или выходе. Автозапуск регистрируется только для текущего пользователя Windows.
 
 ### Безопасность и конфиденциальность
 
@@ -232,6 +235,7 @@ GOST в репозиторий не включён. Получайте его и
 
 - HTTP немесе SOCKS5 сыртқы проксиін және қажет болса логин мен құпиясөзді баптау.
 - Үйлесімді қолданбалар үшін `http://127.0.0.1:8080` жергілікті мекенжайын ұсыну.
+- Қосылған кезде Windows жүйелік проксиін пайдаланатын қолданбаларды осы жергілікті нүктеге бағыттау; ажыратқанда немесе қолданбадан шыққанда бұрынғы параметрлерді қалпына келтіру.
 - Профильді Windows DPAPI арқылы ағымдағы пайдаланушы тіркелгісіне арнап шифрлап сақтау.
 - Негізгі терезеден қосу және ажырату; терезені жүйелік трейге жинау.
 - Бір уақытта CapyProxy бағдарламасының тек бір данасы жұмыс істейді; қайта ашқанда жаңа трей белгішесін қоспай, бұрынғы терезені көрсетеді.
@@ -267,7 +271,7 @@ Set-ExecutionPolicy -Scope Process Bypass
 4. **Подключить** батырмасын басыңыз. Үйлесімді қолданбалар HTTP прокси ретінде `http://127.0.0.1:8080` мекенжайын қолдана алады.
 5. Прокси арқылы көрінетін сыртқы мекенжайды тексеру үшін **Проверить IP** батырмасын басыңыз.
 
-Қолданба VPN қызметін қоспайды және өшірмейді, Windows жүйесіндегі ортақ прокси параметрін өзгертпейді. Автоматты іске қосу тек ағымдағы Windows пайдаланушысына орнатылады.
+Қолданба VPN қызметін қоспайды және өшірмейді. Қосулы кезде ағымдағы Windows пайдаланушысының жүйелік проксиін уақытша `127.0.0.1:8080` мекенжайына орнатып, ажыратқанда немесе қолданбадан шыққанда бұрынғы параметрлерді қалпына келтіреді. Автоматты іске қосу тек ағымдағы Windows пайдаланушысына орнатылады.
 
 ### Қауіпсіздік және құпиялылық
 
